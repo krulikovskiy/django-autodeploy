@@ -62,6 +62,9 @@ def commands(id):
         migrate()
         collectstatic()
         uwsgi_reload()
+        obj.status = 'success'
+        obj.save()
+        ReleaseDeploy.objects.filter(status='wait').update(status='missing')
     except subprocess.CalledProcessError as e:
         obj.status = 'error'
         obj.description = "command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output)
@@ -72,6 +75,7 @@ if celery:
     @celery.task
     def release(id):
         commands(id)
+
 
     @celery.task
     def autorelease():

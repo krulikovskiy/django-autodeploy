@@ -6,6 +6,7 @@ class Release(models.Model):
         ('wait', 'Ожидает релиза'),
         ('success', 'Релиз прошёл успешно'),
         ('error', 'Ошибка при релизе'),
+        ('missing', 'Пропущен'),
     )
 
     status = models.CharField(verbose_name='Статус', choices=STATUS, max_length=1, default='wait')
