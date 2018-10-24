@@ -8,8 +8,8 @@ class Release(models.Model):
         ('error', 'Ошибка при релизе'),
     )
 
-    status = models.CharField(verbose_name='Статус', choices=STATUS, max_length=1)
+    status = models.CharField(verbose_name='Статус', choices=STATUS, max_length=1, default='wait')
     commit = models.CharField(verbose_name='Действие', max_length=255)
-    description = models.TextField(verbose_name='Описание')
+    description = models.TextField(verbose_name='Описание', blank=True, null=True)
     created_at = models.DateTimeField(verbose_name='Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='Дата обновления', auto_now=True)

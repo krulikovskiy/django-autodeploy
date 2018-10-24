@@ -1,6 +1,7 @@
 from django.conf import settings
 from datetime import datetime
 import subprocess
+from .models import Release as ReleaseDeploy
 
 celery_module = getattr(settings, 'AUTODEPLOY_CELERY', False)
 celery = None
@@ -52,7 +53,8 @@ def uwsgi_reload():
         f.close()
 
 
-def commands():
+def commands(id):
+    obj = ReleaseDeploy.objects.filter(id=id).first()
     try:
         pull()
         requirements()
@@ -61,26 +63,38 @@ def commands():
         collectstatic()
         uwsgi_reload()
     except subprocess.CalledProcessError as e:
-        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        obj.status = 'error'
+        obj.description = "command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output)
+        obj.save()
 
 
 if celery:
     @celery.task
-    def release():
-        commands()
+    def release(id):
+        commands(id)
+
+    @celery.task
+    def autorelease():
+        obj = ReleaseDeploy.objects.order_by('-created_at').first()
+        if obj:
+            commands(obj.id)
 else:
-    def release():
-        commands()
+    def release(id):
+        commands(id)
 
 
 def add_release():
+    obj = ReleaseDeploy()
+    obj.commit = '123'
+    obj.save()
+
     if celery and not celery_schedule:
-        release.delay()
+        release.delay(obj.id)
     elif not celery:
-        release()
+        release(obj.id)
 
 
 if celery_schedule:
     @celery.on_after_configure.connect
     def setup_periodic_tasks(sender, **kwargs):
-        sender.add_periodic_task(celery_schedule, release(), name='autodeploy release')
+        sender.add_periodic_task(celery_schedule, autorelease(), name='autodeploy release')
