@@ -17,7 +17,7 @@ git_dir = getattr(settings, 'AUTODEPLOY_DIR', settings.BASE_DIR + '/.git')
 remote = getattr(settings, 'AUTODEPLOY_REMOTE', 'origin')
 branch = getattr(settings, 'AUTODEPLOY_BRANCH', 'master')
 
-uwsgi_filereload = getattr(settings, 'AUTODEPLOY_UWSGI_FILERELOAD', settings.BASE_DIR + '/restart')
+uwsgi_filereload = getattr(settings, 'AUTODEPLOY_UWSGI_FILERELOAD', settings.BASE_DIR + '/.restart')
 
 
 def pull():
