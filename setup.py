@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="AutoDeploy for Django",
-    version= __import__("autodeploy").__version__,
+    version=__import__("autodeploy").__version__,
     description="Автоматически подтягивает изменения из bitbucket, может работать с celery, celery beat",
     long_description=open('README.rst').read(),
     author="Krulikovskiy Nikita",
     author_email="it@krulikovskiy.com",
-    url="krulikovskiy.com",
+    url="https://github.com/krulikovskiy/django-autodeploy",
     packages=find_packages(),
     install_requires=[
         'django>=2.0',

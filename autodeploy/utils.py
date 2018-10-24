@@ -1,4 +1,5 @@
 from django.conf import settings
+from datetime import date
 import os
 
 celery_module = getattr(settings, 'AUTODEPLOY_CELERY', False)
@@ -16,8 +17,7 @@ git_dir = getattr(settings, 'AUTODEPLOY_DIR', settings.BASE_DIR + '/.git')
 remote = getattr(settings, 'AUTODEPLOY_REMOTE', 'origin')
 branch = getattr(settings, 'AUTODEPLOY_BRANCH', 'master')
 
-uwsgi_command_start = getattr(settings, 'AUTODEPLOY_UWSGI_START', 'service uwsgi start')
-uwsgi_command_stop = getattr(settings, 'AUTODEPLOY_UWSGI STOP', 'service uwsgi stop')
+uwsgi_filereload = getattr(settings, 'AUTODEPLOY_UWSGI_FILERELOAD', settings.BASE_DIR + '/restart')
 
 
 def pull():
@@ -37,9 +37,10 @@ def collectstatic():
     os.system('%s %s/manage.py collectstatic --noinput' % (venv_python, settings.BASE_DIR))
 
 
-def uwsgi_restart():
-    os.system(uwsgi_command_stop)
-    os.system(uwsgi_command_start)
+def uwsgi_reload():
+    with open(uwsgi_filereload, 'w') as f:
+        f.write(str(date.today()))
+        f.close()
 
 
 def add_release():
@@ -54,7 +55,7 @@ def release():
     merge()
     migrate()
     collectstatic()
-    uwsgi_restart()
+    uwsgi_reload()
 
 
 if celery_schedule:
