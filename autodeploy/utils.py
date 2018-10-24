@@ -53,12 +53,15 @@ def uwsgi_reload():
 
 
 def commands():
-    pull()
-    requirements()
-    merge()
-    migrate()
-    collectstatic()
-    uwsgi_reload()
+    try:
+        pull()
+        requirements()
+        merge()
+        migrate()
+        collectstatic()
+        uwsgi_reload()
+    except subprocess.CalledProcessError as e:
+        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
 
 if celery:

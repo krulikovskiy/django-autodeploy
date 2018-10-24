@@ -4,7 +4,8 @@ from django.db import models
 class Release(models.Model):
     STATUS = (
         ('wait', 'Ожидает релиза'),
-        ('success', 'Релиз прошёл успешно')
+        ('success', 'Релиз прошёл успешно'),
+        ('error', 'Ошибка при релизе'),
     )
 
     status = models.CharField(verbose_name='Статус', choices=STATUS, max_length=1)
