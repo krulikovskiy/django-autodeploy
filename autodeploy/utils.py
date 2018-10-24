@@ -1,6 +1,6 @@
 from django.conf import settings
 from datetime import datetime
-import os
+import subprocess
 
 celery_module = getattr(settings, 'AUTODEPLOY_CELERY', False)
 celery = None
@@ -24,24 +24,26 @@ uwsgi_filereload = getattr(settings, 'AUTODEPLOY_UWSGI_FILERELOAD', settings.BAS
 
 
 def pull():
-    os.system('git --work-tree=%s --git-dir=%s fetch --all' % (work_tree, git_dir))
-    os.system('git --work-tree=%s --git-dir=%s checkout --force %s/%s' % (work_tree, git_dir, remote, branch))
+    subprocess.check_output('git --work-tree=%s --git-dir=%s fetch --all' % (work_tree, git_dir), shell=True)
+    subprocess.check_output(
+        'git --work-tree=%s --git-dir=%s checkout --force %s/%s' % (work_tree, git_dir, remote, branch), shell=True)
 
 
 def requirements():
-    os.system('%s install -r %s/requirements.txt' % (venv_pip, settings.BASE_DIR))
+    subprocess.check_output('%s install -r %s/requirements.txt' % (venv_pip, settings.BASE_DIR), shell=True)
 
 
 def merge():
-    os.system('%s %s/manage.py makemigrations --merge --noinput' % (venv_python, settings.BASE_DIR))
+    subprocess.check_output('%s %s/manage.py makemigrations --merge --noinput' % (venv_python, settings.BASE_DIR),
+                            shell=True)
 
 
 def migrate():
-    os.system('%s %s/manage.py migrate --noinput' % (venv_python, settings.BASE_DIR))
+    subprocess.check_output('%s %s/manage.py migrate --noinput' % (venv_python, settings.BASE_DIR), shell=True)
 
 
 def collectstatic():
-    os.system('%s %s/manage.py collectstatic --noinput' % (venv_python, settings.BASE_DIR))
+    subprocess.check_output('%s %s/manage.py collectstatic --noinput' % (venv_python, settings.BASE_DIR), shell=True)
 
 
 def uwsgi_reload():
