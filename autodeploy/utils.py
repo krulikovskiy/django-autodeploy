@@ -1,5 +1,5 @@
 from django.conf import settings
-from datetime import date
+from datetime import datetime
 import os
 
 celery_module = getattr(settings, 'AUTODEPLOY_CELERY', False)
@@ -39,8 +39,25 @@ def collectstatic():
 
 def uwsgi_reload():
     with open(uwsgi_filereload, 'w') as f:
-        f.write(str(date.today()))
+        f.write(str(datetime.today()))
         f.close()
+
+
+def commands():
+    pull()
+    merge()
+    migrate()
+    collectstatic()
+    uwsgi_reload()
+
+
+if celery:
+    @celery.task
+    def release():
+        commands()
+else:
+    def release():
+        commands()
 
 
 def add_release():
@@ -48,14 +65,6 @@ def add_release():
         release.delay()
     elif not celery:
         release()
-
-
-def release():
-    pull()
-    merge()
-    migrate()
-    collectstatic()
-    uwsgi_reload()
 
 
 if celery_schedule:
