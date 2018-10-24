@@ -9,9 +9,12 @@ celery_schedule = None
 if celery_module != False:
     module = __import__(celery_module, globals(), locals(), ['app'])
     celery = getattr(module, 'app')
-    celery_schedule = getattr(settings, 'AUTODEPLOY_CELERY_SCHEDULE', False)
+    celery_schedule = getattr(settings, 'AUTODEPLOY_CELERYBEAT_SCHEDULE', False)
 
-venv_python = getattr(settings, 'AUTODEPLOY_VENV_PYTHON', settings.BASE_DIR + '/venv')
+venv_bin = getattr(settings, 'AUTODEPLOY_VENV_PYTHON', settings.BASE_DIR + '/venv/bin')
+venv_python = venv_bin + '/python'
+venv_pip = venv_bin + '/pip'
+
 work_tree = getattr(settings, 'AUTODEPLOY_WORK_TREE', settings.BASE_DIR)
 git_dir = getattr(settings, 'AUTODEPLOY_DIR', settings.BASE_DIR + '/.git')
 remote = getattr(settings, 'AUTODEPLOY_REMOTE', 'origin')
@@ -23,6 +26,10 @@ uwsgi_filereload = getattr(settings, 'AUTODEPLOY_UWSGI_FILERELOAD', settings.BAS
 def pull():
     os.system('git --work-tree=%s --git-dir=%s fetch --all' % (work_tree, git_dir))
     os.system('git --work-tree=%s --git-dir=%s checkout --force %s/%s' % (work_tree, git_dir, remote, branch))
+
+
+def requirements():
+    os.system('%s install -r %s/requirements.txt' % (venv_pip, settings.BASE_DIR))
 
 
 def merge():
@@ -45,6 +52,7 @@ def uwsgi_reload():
 
 def commands():
     pull()
+    requirements()
     merge()
     migrate()
     collectstatic()
