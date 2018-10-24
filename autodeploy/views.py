@@ -1,7 +1,7 @@
 from django.http import JsonResponse
-from .utils import add_release, celery, celery_schedule
+from .utils import add_release
 
 
 def hook(request):
-
-    return JsonResponse({'status': True, '123': 123})
+    add_release()
+    return JsonResponse({'status': True})
